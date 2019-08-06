@@ -12,6 +12,7 @@
             {% if current_user.is_anonymous %}
             <a href="{{ url_for('login') }}">Login</a>
             {% else %}
+            <a href="{{ url_for("user", username=current_user.username) }}">Profile</a>
             <a href="{{ url_for('logout') }}">Logout</a>
             {% endif %}
         </div>
@@ -30,3 +31,7 @@
         {% block content%}{% endblock %}
     </body>
 </html>
+
+<!-- In this line: <a href="{{ url_for("user", username=current_user.username) }}">Profile</a> -->
+<!-- the username part of the url is dynamic, so url_for takes it as a named -->
+<!-- argument. We can use flask_login's current_user to handle direct us to the right place. -->
