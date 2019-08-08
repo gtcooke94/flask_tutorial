@@ -1,5 +1,10 @@
 export FLASK_APP=microblog.py
 #export FLASK_DEBUG=1
+
+
+
+# To start fake local python email server that will just print to the console
+# python -m smtpd -n -c DebuggingServer localhost:8025
 export MAIL_SERVER=localhost
 export MAIL_PORT=8025
 
