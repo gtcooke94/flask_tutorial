@@ -4,6 +4,11 @@ from flask_login import UserMixin
 from app import db, login
 from hashlib import md5
 
+followers = db.Table(
+    "followers",
+    db.Column("follower_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("followed_id", db.Integer, db.ForeignKey("user.id")),
+)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -13,6 +18,21 @@ class User(UserMixin, db.Model):
     posts = db.relationship("Post", backref="author", lazy="dynamic")
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    followed = db.relationship(
+        # Right side of relationship, left is parent class
+        "User",
+        # association table
+        secondary=followers,
+        # Link left side to association table
+        primaryjoin=(followers.c.follower_id == id),
+        # Link right side to association table
+        secondaryjoin=(followers.c.followed_id == id),
+        # Access relationship from the right side
+        # Left side: followed
+        # Right side: followers
+        backref=db.backref("followers", lazy="dynamic"),
+        lazy="dynamic",
+    )
 
     def __repr__(self):
         return "<User {}>".format(self.username)
@@ -36,6 +56,10 @@ class Post(db.Model):
 
     def __repr__(self):
         return "<Post {}>".format(self.body)
+
+
+# Since this is an auxilliary table, it doesn't need the model class definition
+# like Users and Posts has
 
 
 @login.user_loader
