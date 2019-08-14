@@ -26,7 +26,7 @@ def login():
         return redirect(url_for("index"))
     form = LoginForm()
     # The template defines this post request
-    
+
     # form.validate_on_submit() returns false for the GET on "/login", so we
     # render the login template. On POST, it will gather everything, run the
     # validators, make sure everything is ok, and return true. If there are any
@@ -52,10 +52,12 @@ def login():
         return redirect(next_page)
     return render_template("login.html", title="Sign In", form=form)
 
+
 @app.route("/logout")
 def logout():
     logout_user()
     return redirect(url_for("index"))
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -104,6 +106,37 @@ def edit_profile():
         form.about_me.data = current_user.about_me
     return render_template("edit_profile.html", title="Edit Profile", form=form)
 
+
+@app.route("/follow/<username>")
+@login_required
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash("User {} not found.".format(username))
+        return redirect(url_for("index"))
+    if user == current_user:
+        flash("You cannot follow yourself")
+        return redirect(url_for("index"))
+    current_user.follow(user)
+    db.session.commit()
+    flash("You are following {}!".format(username))
+    return redirect(url_for("index"))
+
+
+@app.route("/unfollow/<username>")
+@login_required
+def unfollow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash("User {} not found.".format(username))
+        return redirect(url_for("index"))
+    if user == current_user:
+        flash("You cannot unfollow yourself")
+        return redirect(url_for("index"))
+    current_user.unfollow(user)
+    db.session.commit()
+    flash("You are no longer following {}.".format(username))
+    return redirect(url_for("index"))
 
 
 @app.before_request
